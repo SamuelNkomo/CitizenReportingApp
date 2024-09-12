@@ -1,0 +1,38 @@
+﻿<Window x:Class="CitizenReportingApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CitizenReportingApp"
+        mc:Ignorable="d"
+               Title="Main Menu" Height="450" Width="800">
+
+    <Grid>
+        <!-- Set Background Image -->
+        <Grid.Background>
+            <ImageBrush ImageSource="pack://application:,,,/plett.jpg" Stretch="UniformToFill"/>
+        </Grid.Background>
+
+        <!-- Main content to be hidden when navigating -->
+        <DockPanel Name="MainContentPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <!-- Welcome Text at the Top -->
+            <TextBlock Text="WELCOME TO THE CITY" 
+                       FontSize="100" 
+                       FontWeight="Bold" 
+                       Foreground="White"
+                       HorizontalAlignment="Center"
+                       DockPanel.Dock="Top" 
+                       Margin="20"/>
+
+            <!-- Horizontal Button Layout -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="btnReportIssues" Content="Report Issues" Width="200" Height="40" Click="btnReportIssues_Click"/>
+                <Button x:Name="btnLocalEvents" Content="Local Events and Announcements" Width="200" Height="40" IsEnabled="False" Margin="5"/>
+                <Button x:Name="btnServiceRequestStatus" Content="Service Request Status" Width="200" Height="40" IsEnabled="False" Margin="5"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Frame to host pages, initially hidden -->
+        <Frame Name="MainFrame" NavigationUIVisibility="Hidden" Visibility="Collapsed" />
+    </Grid>
+</Window>
