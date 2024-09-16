@@ -41,9 +41,21 @@ namespace CitizenReportingApp
             string description = new TextRange(rtbDescription.Document.ContentStart, rtbDescription.Document.ContentEnd).Text;
             string attachmentPath = lblAttachment.Text;
 
-            if (string.IsNullOrEmpty(location) || string.IsNullOrEmpty(category))
+            if (string.IsNullOrEmpty(location))
             {
-                MessageBox.Show("Location and Category are required fields.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Location is required.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(category))
+            {
+                MessageBox.Show("Category is required.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(description))
+            {
+                MessageBox.Show("Description is required.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
