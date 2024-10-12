@@ -1,88 +1,99 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace CitizenReportingApp
 {
     public partial class ReportIssuesPage : Page
     {
+        private string attachedFilePath = null;  // Store the attached file path
+
         public ReportIssuesPage()
         {
             InitializeComponent();
         }
 
+        // Attach Media button logic
         private void btnAttachMedia_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png|All Files|*.*";
-            if (openFileDialog.ShowDialog() == true)
+            try
             {
-                lblAttachment.Text = openFileDialog.FileName;
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png|All Files|*.*";
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    attachedFilePath = openFileDialog.FileName;
+                    lblAttachment.Text = $"Selected file: {Path.GetFileName(attachedFilePath)}";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error selecting file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
+        // Submit Report button logic
         private void btnSubmit_Click(object sender, RoutedEventArgs e)
         {
-            string location = txtLocation.Text;
-            string category = (cmbCategory.SelectedItem as ComboBoxItem)?.Content.ToString();
-            string description = new TextRange(rtbDescription.Document.ContentStart, rtbDescription.Document.ContentEnd).Text;
-            string attachmentPath = lblAttachment.Text;
-
-            if (string.IsNullOrEmpty(location))
+            try
             {
-                MessageBox.Show("Location is required.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+                string location = txtLocation.Text.Trim();
+                string category = (cmbCategory.SelectedItem as ComboBoxItem)?.Content.ToString();
+                string description = new TextRange(rtbDescription.Document.ContentStart, rtbDescription.Document.ContentEnd).Text.Trim();
 
-            if (string.IsNullOrEmpty(category))
+                if (string.IsNullOrEmpty(location) || string.IsNullOrEmpty(category))
+                {
+                    MessageBox.Show("Location and Category are required fields.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                string fileName = $"Issue_{DateTime.Now.Ticks}.txt";
+
+                using (StreamWriter writer = new StreamWriter(fileName))
+                {
+                    writer.WriteLine($"Location: {location}");
+                    writer.WriteLine($"Category: {category}");
+                    writer.WriteLine($"Description: {description}");
+                    writer.WriteLine($"Date: {DateTime.Now}");
+
+                    if (!string.IsNullOrEmpty(attachedFilePath))
+                    {
+                        writer.WriteLine($"Attachment: {attachedFilePath}");
+                    }
+                }
+
+                MessageBox.Show("Report submitted successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                ClearForm();
+            }
+            catch (IOException ex)
             {
-                MessageBox.Show("Category is required.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                MessageBox.Show($"File write error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            if (string.IsNullOrEmpty(description))
+            catch (Exception ex)
             {
-                MessageBox.Show("Description is required.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            // Save the issue details to a text file
-            string fileName = $"Issue_{System.DateTime.Now.Ticks}.txt";
-            using (StreamWriter writer = new StreamWriter(fileName))
-            {
-                writer.WriteLine($"Location: {location}");
-                writer.WriteLine($"Category: {category}");
-                writer.WriteLine($"Description: {description.Trim()}");
-                writer.WriteLine($"Attachment: {attachmentPath}");
-            }
-
-            lblReportDetails.Visibility = Visibility.Visible;
-            lblReportDetails.Text = $"Report Submitted:\nLocation: {location}\nCategory: {category}\nDescription: {description.Trim()}\nAttachment: {attachmentPath}";
         }
 
+        // Clear the form fields
+        private void ClearForm()
+        {
+            txtLocation.Clear();
+            cmbCategory.SelectedItem = null;
+            rtbDescription.Document.Blocks.Clear();
+            lblAttachment.Text = "No file selected";
+            attachedFilePath = null;
+        }
+
+        // Back to Main Menu
         private void btnBackToMain_Click(object sender, RoutedEventArgs e)
         {
-            // Get the MainWindow instance
             var mainWindow = (MainWindow)Application.Current.MainWindow;
-
-            // Show the main menu content (welcome text and buttons) again
-            mainWindow.MainContentPanel.Visibility = Visibility.Visible;
-
-            // Hide the Frame that is hosting the ReportIssuesPage
-            mainWindow.MainFrame.Visibility = Visibility.Collapsed;
+            mainWindow.NavigateToMainMenu();
         }
     }
 }
